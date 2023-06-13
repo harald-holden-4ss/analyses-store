@@ -1,11 +1,21 @@
 from azure.cosmos import CosmosClient
 import uuid
+import os
+from dotenv import load_dotenv as _load_dotenv
+from pathlib import Path
+from os.path import expanduser
+import os
+_user_env_file = Path(expanduser("~")) / ".analysesstore"
+print(_user_env_file)
+_load_dotenv()
+_load_dotenv(_user_env_file)
 
 
 class database_service(object):
     def __init__(self):
-        HOST = "https://expert-service-analysis-store-data.documents.azure.com:443/"
-        MASTER_KEY = "SfRTCeE27yp00EJ9FjOravq6wuHeD9XCjkNQ3z7XTLbkNksn2z47EacFlsUcrnDheMzLP7ROiupNACDb5M7Vrg=="
+        HOST = os.getenv("AZURE_COSMOS_DB_HOST")
+        MASTER_KEY = os.getenv("AZURE_COSMOS_DB_MASTER_KEY")
+
         self.client = CosmosClient(HOST, MASTER_KEY)
         self.data_base_proxy = self.client.get_database_client("dynops-store-data")
 

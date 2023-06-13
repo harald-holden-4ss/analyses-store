@@ -1,7 +1,8 @@
 fastapi
+pydantic
 uvicorn[standard]
 azure-cosmos
 azure-identity
 python-jose[cryptography]
 pytest
-unittest
+
