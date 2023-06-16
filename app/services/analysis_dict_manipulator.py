@@ -1,5 +1,5 @@
 from copy import deepcopy
-from ..models.analyses import DEFAULT_UNITS
+from app.models.analyses import DEFAULT_UNITS
 
 
 def extract_summary_result_types(document):

@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/a935cf4c-14fd-4ceb-ac35-de0ae34fd78c/resourceGroups/expert-service-analyses-store/providers/Microsoft.Web/sites/4subsea-drilling-analysis-store",
+    "appService.deploySubpath": "."
+}
