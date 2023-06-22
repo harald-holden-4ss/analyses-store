@@ -108,27 +108,6 @@ class analyses_metadata(BaseModel):
     drillpipe_tension: float = Field(ge=0.0)
     comment: Optional[str]
 
-    # class Config:
-    #     schema_extra = {
-    #         'example': {
-    #             'ResponsibleEngineer': 'jonny loggon',
-    #             'ProjectID': 1001,
-    #             'WellName': 'Well 1',
-    #             WellLocation
-    # Version: str = Field(min_length=1)
-    # AnalysisType: str
-    # SimulationLength: float = Field(gt=0.)
-    # WaterDepth: float = Field(gt=0.)
-    # WaveDir: float = Field(ge=0., le=360.)
-    # Current: bool
-    # VesselId: str = Field(default_factory=uuid4)
-    # XT: bool
-    # SoilProfile: str = Field(min_length=1)
-    # Overpull: float = Field(ge=0.)
-    # DPTension: float = Field(ge=0.)
-
-    #         }
-    #     }
 
 
 class summary_value_type(BaseModel):
