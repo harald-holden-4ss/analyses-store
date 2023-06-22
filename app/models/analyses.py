@@ -80,13 +80,14 @@ class lon_lat_location(BaseModel):
     longitude: float = Field(None, ge=-180.0, le=180.0)
     latitude: float = Field(None, ge=-90.0, le=90.0)
 
+
 class well_info(BaseModel):
     name: Optional[str] = Field(min_length=1)
     well_boundary_type: Literal["fixed", "well_included", "rotational_spring"]
     design_type: Optional[Literal["can", "satelite", "template"]]
     location: Optional[lon_lat_location]
     stiffness: float = Field(ge=0.)
-    feature = Optional[Union[str, Literal["wlr", "rfj"]]]
+    feature: Union[None, Literal["wlr", "rfj"]]
     soil_type: Optional[Literal["api", "jeanjean", "'zakeri"]]
     soil_version: Optional[Literal["high", "low", "best"]]
     soil_sensitivity: Optional[Literal["clay", "sand"]]
