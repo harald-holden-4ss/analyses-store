@@ -117,7 +117,7 @@ class analyses_metadata(BaseModel):
     overpull: float = Field(ge=0.0)
     drillpipe_tension: float = Field(ge=0.0)
     comment: Optional[str]
-    offset_percent_of_wd: float = Field(gt=0.0)
+    offset_percent_of_wd: float = Field(ge=0.0)
 
 
 
