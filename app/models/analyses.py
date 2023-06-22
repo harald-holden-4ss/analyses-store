@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from uuid import uuid4, UUID
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, Union
 from enum import Enum
 
 DEFAULT_UNITS = {
@@ -80,6 +80,16 @@ class lon_lat_location(BaseModel):
     longitude: float = Field(None, ge=-180.0, le=180.0)
     latitude: float = Field(None, ge=-90.0, le=90.0)
 
+class well_info(BaseModel):
+    name: Optional[str] = Field(min_length=1)
+    well_boundary_type: Literal["fixed", "well_included", "rotational_spring"]
+    design_type: Optional[Literal["can", "satelite", "template"]]
+    location: Optional[lon_lat_location]
+    stiffness: float = Field(ge=0.)
+    feature = Optional[Union[str, Literal["wlr", "rfj"]]]
+    soil_type: Optional[Literal["api", "jeanjean", "'zakeri"]]
+    soil_version: Optional[Literal["high", "low", "best"]]
+    soil_sensitivity: Optional[Literal["clay", "sand"]]
 
 class vessel(BaseModel):
     id: Optional[UUID]
@@ -90,8 +100,7 @@ class vessel(BaseModel):
 class analyses_metadata(BaseModel):
     responsible_engineer: str
     project_id: int = Field(gt=1000)
-    well_name: str = Field(min_length=1)
-    well_location: lon_lat_location
+    well: well_info
     version: str = Field(min_length=1)
     analysis_type: str
     simulation_lenght: float = Field(gt=0.0)
@@ -107,28 +116,8 @@ class analyses_metadata(BaseModel):
     overpull: float = Field(ge=0.0)
     drillpipe_tension: float = Field(ge=0.0)
     comment: Optional[str]
+    offset_percent_of_wd: float = Field(gt=0.0)
 
-    # class Config:
-    #     schema_extra = {
-    #         'example': {
-    #             'ResponsibleEngineer': 'jonny loggon',
-    #             'ProjectID': 1001,
-    #             'WellName': 'Well 1',
-    #             WellLocation
-    # Version: str = Field(min_length=1)
-    # AnalysisType: str
-    # SimulationLength: float = Field(gt=0.)
-    # WaterDepth: float = Field(gt=0.)
-    # WaveDir: float = Field(ge=0., le=360.)
-    # Current: bool
-    # VesselId: str = Field(default_factory=uuid4)
-    # XT: bool
-    # SoilProfile: str = Field(min_length=1)
-    # Overpull: float = Field(ge=0.)
-    # DPTension: float = Field(ge=0.)
-
-    #         }
-    #     }
 
 
 class summary_value_type(BaseModel):
