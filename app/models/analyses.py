@@ -18,7 +18,9 @@ DEFAULT_UNITS = {
         "position x": "m",
         "position y": "m",
         "position z": "m",
-        "velocity x": "m",
+        "velocity x": "m/s",
+        "velocity y": "m/s",
+        "velocity z": "m/s"
 
 }
 class update_analysis_summary_input(BaseModel):
@@ -34,6 +36,12 @@ class update_analysis_summary_input(BaseModel):
         "rig_rkb",
     ]
     result_type: Literal[
+        "vessel heave",
+        "vessel surge",
+        "vessel sway",
+        "vessel roll",
+        "vessel pitch",
+        "vessel yaw"
         "angle rx",
         "angle ry",
         "angle rz",
@@ -50,6 +58,7 @@ class update_analysis_summary_input(BaseModel):
         "position z",
         "velocity x",
         "velocity y",
+        "velocity z"
     ]
     method: str
     value: float
