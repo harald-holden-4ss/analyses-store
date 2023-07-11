@@ -118,7 +118,7 @@ class analyses_metadata(BaseModel):
     drillpipe_tension: float = Field(ge=0.0)
     comment: Optional[str]
     offset_percent_of_wd: float = Field(ge=0.0)
-    sampling_frequency: float = Field(ge=0.0)
+    client: str = Field(min_length=1)
 
 
 
