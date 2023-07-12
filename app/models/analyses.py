@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from uuid import uuid4, UUID
-from typing import Optional, List, Literal, Union
-from enum import Enum
+from typing import List, Literal
+
 
 DEFAULT_UNITS = {
         "angle rx": "deg",
@@ -79,13 +79,14 @@ class update_analyses_summary_input(BaseModel):
 
 
 class general_results(BaseModel):
-    m_eq_dominant_direction: Optional[float] = Field(ge=0.0)
-    m_extreme_drilling: Optional[float] = Field(ge=0.0) 
-    m_extreme_nondrilling: Optional[float] = Field(ge=0.0)
+
+    m_eq_dominant_direction: float = Field(None, ge=0.0)
+    m_extreme_drilling: float = Field(None, ge=0.0) 
+    m_extreme_nondrilling: float = Field(None, ge=0.0)
 
 
-    class Config:
-        schema_extra = {"example": {"M_eq_dominant_direction": 1000.0}}
+    # class Config:
+    #     schema_extra = {"example": {"M_eq_dominant_direction": 1000.0}}
 
 
 class lon_lat_location(BaseModel):
@@ -94,22 +95,22 @@ class lon_lat_location(BaseModel):
 
 
 class soil_data(BaseModel):
-    soil_type: Optional[Literal["api", "jeanjean", "'zakeri"]]
-    soil_version: Optional[Literal["high", "low", "best"]]
-    soil_sensitivity: Optional[Literal["clay", "sand"]]
+    soil_type: Literal["api", "jeanjean", "'zakeri"] | None = None
+    soil_version: Literal["high", "low", "best"] | None = None
+    soil_sensitivity: Literal["clay", "sand"] | None = None
 
 
 class well_info(BaseModel):
-    name: Optional[str] = Field(min_length=1)
+    name: str = Field(None, min_length=1)
     well_boundary_type: Literal["fixed", "well_included", "rotational_spring"]
-    design_type: Optional[Literal["can", "satelite", "template"]]
-    location: Optional[lon_lat_location]
+    design_type: Literal["can", "satelite", "template"] | None = None
+    location: lon_lat_location | None = None
     stiffness: float = Field(ge=0.)
-    feature: Union[None, Literal["wlr", "rfj"]]
-    soil: Optional[soil_data]
+    feature: Literal["wlr", "rfj"] | None = None
+    soil: soil_data | None = None
 
 class vessel(BaseModel):
-    id: Optional[UUID]
+    id: UUID | None = None
     name: str = Field(min_length=1)
     imo: int = Field(gt=0)
 
@@ -132,9 +133,9 @@ class analyses_metadata(BaseModel):
     soil_profile: str = Field(min_length=1)
     overpull: float = Field(ge=0.0)
     drillpipe_tension: float = Field(ge=0.0)
-    comment: Optional[str]
+    comment: str = None
     offset_percent_of_wd: float = Field(ge=0.0)
-    client: str = Field(min_length=1)
+    client: str = Field(None, min_length=1)
 
 
 class summary_value_type(BaseModel):
@@ -144,7 +145,7 @@ class summary_value_type(BaseModel):
 
 class one_seastate_result(BaseModel):
     summary_values: List[summary_value_type]
-    time_series_id: Optional[str]
+    time_series_id: str = None
 
 
 class seastate_result_data(BaseModel):
@@ -165,7 +166,7 @@ class result_scatter(BaseModel):
 
 
 class analysis_result(BaseModel):
-    id: Optional[UUID]
+    id: UUID = None
     metadata: analyses_metadata
     general_results: general_results
     all_seastate_results: List[result_scatter]
