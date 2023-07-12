@@ -23,10 +23,7 @@ DEFAULT_UNITS = {
         "velocity z": "m/s"
 
 }
-class update_analysis_summary_input(BaseModel):
-    hs: float = Field(gt=0.0)
-    tp: float = Field(gt=0.0)
-    location: Literal[
+ALLOWABLE_LOCATIONS = Literal[
         "wh_datum",
         "lfj_below",
         "lfj_above",
@@ -35,20 +32,24 @@ class update_analysis_summary_input(BaseModel):
         "rig_center",
         "rig_rkb",
     ]
-    result_type: Literal[
+
+
+ALLOWABLE_RESULT_TYPES = Literal[
         "vessel heave",
         "vessel surge",
         "vessel sway",
         "vessel roll",
         "vessel pitch",
-        "vessel yaw"
+        "vessel yaw",
         "angle rx",
         "angle ry",
         "angle rz",
         "bending moment local x",
         "bending moment local y",
+        "bending moment dominant direction",
         "shear force local x",
         "shear force local y",
+        "shear force dominant direction",
         "effective tension",
         "displacement x",
         "displacement y",
@@ -60,6 +61,14 @@ class update_analysis_summary_input(BaseModel):
         "velocity y",
         "velocity z"
     ]
+
+ALLOWABLE_UNITS = Literal["m", "N", "kN", "Nm", "kNm", "deg", "rad", "m/s"]
+
+class update_analysis_summary_input(BaseModel):
+    hs: float = Field(gt=0.0)
+    tp: float = Field(gt=0.0)
+    location: ALLOWABLE_LOCATIONS
+    result_type: ALLOWABLE_RESULT_TYPES
     method: str
     value: float
 
@@ -70,6 +79,7 @@ class update_analyses_summary_input(BaseModel):
 
 
 class general_results(BaseModel):
+
     m_eq_dominant_direction: float = Field(None, ge=0.0)
     m_extreme_drilling: float = Field(None, ge=0.0) 
     m_extreme_nondrilling: float = Field(None, ge=0.0)
@@ -128,7 +138,6 @@ class analyses_metadata(BaseModel):
     client: str = Field(None, min_length=1)
 
 
-
 class summary_value_type(BaseModel):
     method: Literal["std", "max", "min", 'mean', 'm_eq']
     value: float
@@ -146,35 +155,9 @@ class seastate_result_data(BaseModel):
 
 
 class scatter_result_metadata(BaseModel):
-    location: Literal[
-        "wh_datum",
-        "lfj_below",
-        "lfj_above",
-        "ufj_above",
-        "ufj_below",
-        "rig_center",
-        "rig_rkb",
-    ]
-    result_type: Literal[
-        "angle rx",
-        "angle ry",
-        "angle rz",
-        "bending moment local x",
-        "bending moment local y",
-        "bending moment dominant direction",
-        "shear force local x",
-        "shear force local y",
-        "effective tension",
-        "displacement x",
-        "displacement y",
-        "displacement z",
-        "position x",
-        "position y",
-        "position z",
-        "velocity x",
-        "velocity y",
-    ]
-    unit: Literal["m", "N", "kN", "Nm", "kNm", "deg", "rad", "m/s"]
+    location: ALLOWABLE_LOCATIONS
+    result_type: ALLOWABLE_RESULT_TYPES
+    unit: ALLOWABLE_UNITS
 
 
 class result_scatter(BaseModel):
