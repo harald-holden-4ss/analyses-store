@@ -121,7 +121,7 @@ class analyses_metadata(BaseModel):
     well: well_info
     version: str = Field(min_length=1)
     analysis_type: str
-    simulation_lenght: float = Field(gt=0.0)
+    simulation_length: float = Field(gt=0.0)
     water_depth: float = Field(gt=0.0)
     wave_direction: float = Field(ge=0.0, le=360.0)
     vessel_heading: float = Field(ge=0.0, le=360.0)
