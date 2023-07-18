@@ -64,7 +64,7 @@ ALLOWABLE_RESULT_TYPES = Literal[
 
 ALLOWABLE_UNITS = Literal["m", "N", "kN", "Nm", "kNm", "deg", "rad", "m/s"]
 
-class update_analysis_summary_input(BaseModel):
+class update_analysis_summary_input(BaseModel, extra='forbid'):
     hs: float = Field(gt=0.0)
     tp: float = Field(gt=0.0)
     location: ALLOWABLE_LOCATIONS
@@ -73,12 +73,12 @@ class update_analysis_summary_input(BaseModel):
     value: float
 
 
-class update_analyses_summary_input(BaseModel):
+class update_analyses_summary_input(BaseModel, extra='forbid'):
     id: UUID
     updates: List[update_analysis_summary_input]
 
 
-class general_results(BaseModel):
+class general_results(BaseModel, extra='forbid'):
 
     m_eq_dominant_direction: float = Field(None, ge=0.0)
     m_extreme_drilling: float = Field(None, ge=0.0) 
@@ -89,18 +89,18 @@ class general_results(BaseModel):
     #     schema_extra = {"example": {"M_eq_dominant_direction": 1000.0}}
 
 
-class lon_lat_location(BaseModel):
+class lon_lat_location(BaseModel, extra='forbid'):
     longitude: float = Field(None, ge=-180.0, le=180.0)
     latitude: float = Field(None, ge=-90.0, le=90.0)
 
 
-class soil_data(BaseModel):
+class soil_data(BaseModel, extra='forbid'):
     soil_type: Literal["api", "jeanjean", "'zakeri"] | None = None
     soil_version: Literal["high", "low", "best"] | None = None
     soil_sensitivity: Literal["clay", "sand"] | None = None
 
 
-class well_info(BaseModel):
+class well_info(BaseModel, extra='forbid'):
     name: str = Field(None, min_length=1)
     well_boundary_type: Literal["fixed", "well_included", "rotational_spring"]
     design_type: Literal["can", "satelite", "template"] | None = None
@@ -109,13 +109,13 @@ class well_info(BaseModel):
     feature: Literal["wlr", "rfj"] | None = None
     soil: soil_data | None = None
 
-class vessel(BaseModel):
+class vessel(BaseModel, extra='forbid'):
     id: UUID | None = None
     name: str = Field(min_length=1)
     imo: int = Field(gt=0)
 
 
-class analyses_metadata(BaseModel):
+class analyses_metadata(BaseModel, extra='forbid'):
     responsible_engineer: str
     project_id: int = Field(gt=1000)
     well: well_info
@@ -138,34 +138,34 @@ class analyses_metadata(BaseModel):
     client: str = Field(None, min_length=1)
 
 
-class summary_value_type(BaseModel):
+class summary_value_type(BaseModel, extra='forbid'):
     method: Literal["std", "max", "min", 'mean', 'm_eq']
     value: float
 
 
-class one_seastate_result(BaseModel):
+class one_seastate_result(BaseModel, extra='forbid'):
     summary_values: List[summary_value_type]
     time_series_id: str = None
 
 
-class seastate_result_data(BaseModel):
+class seastate_result_data(BaseModel, extra='forbid'):
     hs: float = Field(gt=0.0)
     tp: float = Field(gt=0.0)
     result: one_seastate_result
 
 
-class scatter_result_metadata(BaseModel):
+class scatter_result_metadata(BaseModel, extra='forbid'):
     location: ALLOWABLE_LOCATIONS
     result_type: ALLOWABLE_RESULT_TYPES
     unit: ALLOWABLE_UNITS
 
 
-class result_scatter(BaseModel):
+class result_scatter(BaseModel, extra='forbid'):
     meta: scatter_result_metadata
     data: List[seastate_result_data]
 
 
-class analysis_result(BaseModel):
+class analysis_result(BaseModel, extra='forbid'):
     id: UUID = None
     metadata: analyses_metadata
     general_results: general_results
