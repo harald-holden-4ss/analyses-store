@@ -25,6 +25,7 @@ class database_service(object):
             ],
             enable_cross_partition_query=True,
         )
+
         return [_remove_internal_dict_keys(c) for c in list(q_results)][0]
 
     def delete_one_document_by_id(self, collection_name: str, document_id: str):
