@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+import pandas as pd
 from ..models.analyses import (
     update_analyses_summary_input
 )
@@ -66,6 +67,17 @@ def add_detailed_routes(db_serv: database_service, router: APIRouter):
         doc = db_serv.get_one_document_by_id("analyses", id)
         summary_res = extract_all_summary_results(doc)
         return summary_res
+    @router.get("/dynamic_interpolator/{id}")
+    def get_seastate_summary(id: str):
+        doc = db_serv.get_one_document_by_id("analyses", id)
+        return_document = {
+            "meta":{ **doc['metadata']},
+            "categorical_attributes":['location', 'result_type', 'method'],
+            "continuous_attributes": [],
+            "scatters":[]}
+        
+        summary_res = extract_all_summary_results(doc)
+        return return_document
     
     return router
 
