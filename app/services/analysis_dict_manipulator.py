@@ -80,17 +80,18 @@ def update_seastate_summary_results(document, list_of_updates):
     for update in list_of_updates:
         return_document = update_one_seastate_sumamry_value(
             document=return_document,
-            hs=update['hs'],
-            tp=update['tp'],
-            location=update['location'],
-            result_type=update['result_type'],
-            method=update['method'], 
-            value=update['value'])
+            hs=update["hs"],
+            tp=update["tp"],
+            location=update["location"],
+            result_type=update["result_type"],
+            method=update["method"],
+            value=update["value"],
+        )
     return return_document
 
 
 def update_one_seastate_timeseriesid(
-    document, hs, tp, location, result_type, timeseries_id, unit=None    
+    document, hs, tp, location, result_type, timeseries_id, unit=None
 ):
     output_document = deepcopy(document)
     all_seastate_results = output_document["all_seastate_results"].copy()
@@ -117,29 +118,29 @@ def update_one_seastate_timeseriesid(
                 {
                     "hs": hs,
                     "tp": tp,
-                    "result": {"time_series_id": timeseries_id, "summary_values":[]},
+                    "result": {"time_series_id": timeseries_id, "summary_values": []},
                 }
             )
         #            raise KeyError(f"Data for hs = {hs} and tp = {tp} not found")
         output_document["all_seastate_results"][one_result_index] = one_result
-        
+
     else:
         if unit is None:
             unit = _get_default_unit(result_type=result_type)
         one_result = {
-            'meta': {
-                'location': location,
-                'result_type': result_type,
-                'unit': unit},
-            'data':[{
+            "meta": {"location": location, "result_type": result_type, "unit": unit},
+            "data": [
+                {
                     "hs": hs,
                     "tp": tp,
-                    "result": {"time_series_id": timeseries_id, "summary_values":[]}}]
-            }
+                    "result": {"time_series_id": timeseries_id, "summary_values": []},
+                }
+            ],
+        }
         output_document["all_seastate_results"].append(one_result)
     return output_document
 
-    
+
 def update_one_seastate_sumamry_value(
     document, hs, tp, location, result_type, method, value, unit=None
 ):
@@ -176,28 +177,23 @@ def update_one_seastate_sumamry_value(
                     "result": {"summary_values": [{"method": method, "value": value}]},
                 }
             )
-        #            raise KeyError(f"Data for hs = {hs} and tp = {tp} not found")
         output_document["all_seastate_results"][one_result_index] = one_result
-        
+
     else:
         if unit is None:
             unit = _get_default_unit(result_type=result_type)
         one_result = {
-            'meta': {
-                'location': location,
-                'result_type': result_type,
-                'unit': unit},
-            'data':[{
+            "meta": {"location": location, "result_type": result_type, "unit": unit},
+            "data": [
+                {
                     "hs": hs,
                     "tp": tp,
                     "result": {"summary_values": [{"method": method, "value": value}]},
-                }]
-            }
+                }
+            ],
+        }
         output_document["all_seastate_results"].append(one_result)
     return output_document
-        # raise KeyError(
-        #     f"Data for location = {location} and result type = {result_type} not found"
-        # )
 
 
 def _get_default_unit(result_type):

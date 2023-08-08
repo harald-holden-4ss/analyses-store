@@ -347,10 +347,5 @@ def test_update_one_seastate_sumamry_value(filter_dict_mock, update_summary_mock
         method="dummy_method",
         value=1.0,
     )
-    
+
     print(result)
-
-
-
-
-
