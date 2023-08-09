@@ -8,46 +8,76 @@ from ..services.analysis_dict_manipulator import (
     extract_all_summary_results,
 )
 from ..services.database_service import database_service
+from typing import Literal
 
 
 # from ..services.database_service import database_service
-def add_detailed_routes(db_serv: database_service, router: APIRouter):
+def add_detailed_routes( db_serv: database_service, router: APIRouter):
     @router.get("/summary/result_summary")
-    def get_result_summary():
+    def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None):
+        if result_type is None:
+            result_type = "simple"
         vessel_dict = _get_vessel_dict(db_serv)
         documents = db_serv.get_all_documents("analyses")
+
         response_values = []
         for d in documents:
-            response_values.append(
-                {
-                    "id": d["id"],
-                    "analysis_type": d["metadata"]["analysis_type"],
-                    "water_depth": d["metadata"]["water_depth"],
-                    "vessel": vessel_dict[d["metadata"]["vessel_id"]],
-                    "project_id": d["metadata"]["project_id"],
-                    "well_name": d["metadata"]["well"]["name"],
-                    "wave_direction": d["metadata"]["wave_direction"],
-                    "vessel_heading": d["metadata"]["vessel_heading"],
-                    "current": d["metadata"]["current"],
-                    "xt": d["metadata"]["xt"],
-                    "overpull": d["metadata"]["overpull"],
-                    "drillpipe_tension": d["metadata"]["drillpipe_tension"],
-                    "comment": d["metadata"]["comment"],
-                    "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
-                    "client":d["metadata"]["client"],
-                    "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
-                    **d["general_results"],
-                }
-            )
-
+            if result_type == "simple":
+                response_values.append(
+                    {
+                        "id": d["id"],
+                        "analysis_type": d["metadata"]["analysis_type"],
+                        "water_depth": d["metadata"]["water_depth"],
+                        "vessel": vessel_dict[d["metadata"]["vessel_id"]],
+                        "project_id": d["metadata"]["project_id"],
+                        "well_name": d["metadata"]["well"]["name"],
+                        "wave_direction": d["metadata"]["wave_direction"],
+                        "vessel_heading": d["metadata"]["vessel_heading"],
+                        "current": d["metadata"]["current"],
+                        # "xt": d["metadata"]["xt"],
+                        # "overpull": d["metadata"]["overpull"],
+                        # "drillpipe_tension": d["metadata"]["drillpipe_tension"],
+                        # "comment": d["metadata"]["comment"],
+                        # "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
+                        # "client":d["metadata"]["client"],
+                        # "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
+                        **d["general_results"],
+                    }
+                )
+            elif result_type == "detailed":
+                response_values.append(
+                    {
+                        "id": d["id"],
+                        "analysis_type": d["metadata"]["analysis_type"],
+                        "water_depth": d["metadata"]["water_depth"],
+                        "vessel": vessel_dict[d["metadata"]["vessel_id"]],
+                        "project_id": d["metadata"]["project_id"],
+                        "well_name": d["metadata"]["well"]["name"],
+                        "wave_direction": d["metadata"]["wave_direction"],
+                        "vessel_heading": d["metadata"]["vessel_heading"],
+                        "current": d["metadata"]["current"],
+                        "xt": d["metadata"]["xt"],
+                        "overpull": d["metadata"]["overpull"],
+                        "drillpipe_tension": d["metadata"]["drillpipe_tension"],
+                        "comment": d["metadata"]["comment"],
+                        "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
+                        "client":d["metadata"]["client"],
+                        "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
+                        **d["general_results"],
+                    }
+                )
+            else:
+                response_values.append({"id": d["id"], **d["metadata"],
+                                         **d["general_results"]})
+            
         return response_values
 
-    @router.get("/summary/result_summary_allmeta")
-    def get_result_summary():
-        documents = db_serv.get_all_documents("analyses")
-        return [
-            {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-        ]
+    # @router.get("/summary/result_summary_allmeta")
+    # def get_result_summary():
+    #     documents = db_serv.get_all_documents("analyses")
+    #     return [
+    #         {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
+    #     ]
     @router.put("/update/update_one/{id}")
     def put_modify_document(id: str, 
                             updates: list[json_patch_modify]):
