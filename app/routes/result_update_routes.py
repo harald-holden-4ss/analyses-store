@@ -88,26 +88,27 @@ def add_detailed_routes(db_serv: database_service, router: APIRouter):
     @router.get("/dynamic_interpolator/{id}")
     def get_dynamic_interpolator(id: str):
         doc = db_serv.get_one_document_by_id("analyses", id)
-        return_document = {
-            "meta": {**doc["metadata"]},
-            "categorical_attributes": ["location", "result_type", "method"],
-            "continuous_attributes": [],
-            "scatters": [],
-        }
 
         summary_res = pd.DataFrame(extract_all_summary_results(doc))
         summary_res["res_id"] = summary_res["location"].str.cat(
             summary_res["result_type"].str.cat(summary_res["method"], sep="__"),
             sep="__",
         )
+        return_documents = []
 
         for res_id, one_res_id_data in summary_res.groupby("res_id"):
-            one_scatter = {
+            return_document = {
                 "meta": {
                     "location": one_res_id_data["location"].unique()[0],
                     "result_type": one_res_id_data["result_type"].unique()[0],
                     "method": one_res_id_data["method"].unique()[0],
                 },
+                # "categorical_attributes": ["location", "result_type", "method"],
+                # "continuous_attributes": [],
+                "scatters": [],
+            }
+            one_scatter = {
+                "meta": {},
                 "data": [],
             }
             for _, one_seastate in one_res_id_data.iterrows():
@@ -120,8 +121,9 @@ def add_detailed_routes(db_serv: database_service, router: APIRouter):
                 )
 
             return_document["scatters"].append(one_scatter)
+            return_documents.append(return_document)
 
-        return return_document
+        return return_documents
 
     return router
 
