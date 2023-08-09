@@ -15,7 +15,7 @@ def get_app():
     db_serv = database_service()
     print(db_serv)
     app = FastAPI()
-    api = APIRouter(prefix="/api")  # , dependencies=[authorized_user]
+    api = APIRouter(prefix="/api", dependencies=[authorized_user])  # 
     vessels_routes = get_router_one_collection(db_serv, "vessels", vessel)
     analyses_base_routes = get_router_one_collection(
         db_serv, "analyses", analysis_result
