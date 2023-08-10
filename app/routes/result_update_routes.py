@@ -178,7 +178,7 @@ def get_advanced_analyses_results_routes(db_serv: database_service, prefix: str)
 
         return [
             {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-        ]
+        ] 
 
     @router.put("/seastate_summary_update")
     def put_update_summary(updates: update_analyses_summary_input):
