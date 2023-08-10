@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 import pandas as pd
+import numpy as np
 import jsonpatch
 from ..models.analyses import update_analyses_summary_input
 from ..models.jsonpatch import json_patch_modify
@@ -23,6 +24,14 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
         response_values = []
         for d in documents:
             if result_type == "simple":
+                if d["metadata"]["xt"]:
+                    xt_string = "Yes"
+                else:
+                    xt_string = "No"
+                if 'm_eq_dominant_direction' in d:
+                    m_eq = d['m_eq_dominant_direction']
+                else:
+                    m_eq=None
                 response_values.append(
                     {
                         "id": d["id"],
@@ -31,17 +40,16 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
                         "vessel": vessel_dict[d["metadata"]["vessel_id"]],
                         "project_id": d["metadata"]["project_id"],
                         "well_name": d["metadata"]["well"]["name"],
-                        "wave_direction": d["metadata"]["wave_direction"],
-                        "vessel_heading": d["metadata"]["vessel_heading"],
+                        "wave_direction_relative_to_rig": np.abs(d["metadata"]["wave_direction"] - d["metadata"]["vessel_heading"]),
                         "current": d["metadata"]["current"],
-                        # "xt": d["metadata"]["xt"],
-                        # "overpull": d["metadata"]["overpull"],
+                        "xt": xt_string,
+                        "overpull": d["metadata"]["overpull"],
                         # "drillpipe_tension": d["metadata"]["drillpipe_tension"],
-                        # "comment": d["metadata"]["comment"],
+                        "comment": d["metadata"]["comment"],
                         # "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
-                        # "client":d["metadata"]["client"],
+                        "client": d["metadata"]["client"],
                         # "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
-                        **d["general_results"],
+                        'm_eq_dominant_direction': m_eq,
                     }
                 )
             elif result_type == "detailed":
@@ -61,23 +69,17 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
                         "drillpipe_tension": d["metadata"]["drillpipe_tension"],
                         "comment": d["metadata"]["comment"],
                         "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
-                        "client":d["metadata"]["client"],
+                        "client": d["metadata"]["client"],
                         "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
                         **d["general_results"],
                     }
                 )
             else:
                 response_values.append({"id": d["id"], **d["metadata"],
-                                         **d["general_results"]})
+                                        **d["general_results"]})
             
         return response_values
 
-    # @router.get("/summary/result_summary_allmeta")
-    # def get_result_summary():
-    #     documents = db_serv.get_all_documents("analyses")
-    #     return [
-    #         {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-    #     ]
     @router.put("/update/update_one/{id}")
     def put_modify_document(id: str, 
                             updates: list[json_patch_modify]):
@@ -176,7 +178,7 @@ def get_advanced_analyses_results_routes(db_serv: database_service, prefix: str)
 
         return [
             {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-        ]
+        ] 
 
     @router.put("/seastate_summary_update")
     def put_update_summary(updates: update_analyses_summary_input):
