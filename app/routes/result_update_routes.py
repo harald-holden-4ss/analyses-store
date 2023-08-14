@@ -28,10 +28,10 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
                     xt_string = "Yes"
                 else:
                     xt_string = "No"
-                if 'm_eq_dominant_direction' in d:
-                    m_eq = d['m_eq_dominant_direction']
+                if 'm_eq_dominant_direction' in d["general_results"]:
+                    m_eq = d["general_results"]['m_eq_dominant_direction']
                 else:
-                    m_eq=None
+                    m_eq = None
                 response_values.append(
                     {
                         "id": d["id"],
