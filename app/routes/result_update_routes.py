@@ -40,15 +40,17 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
                         "vessel": vessel_dict[d["metadata"]["vessel_id"]],
                         "project_id": d["metadata"]["project_id"],
                         "well_name": d["metadata"]["well"]["name"],
-                        "wave_direction_relative_to_rig": np.abs(d["metadata"]["wave_direction"] - d["metadata"]["vessel_heading"]),
+                        "wave_direction_relative_to_rig": np.abs(
+                            d["metadata"]["wave_direction"] -
+                            d["metadata"]["vessel_heading"]),
                         "current": d["metadata"]["current"],
                         "xt": xt_string,
                         "overpull": d["metadata"]["overpull"],
+                        "well_data": _get_well_summary(d['metadata']['well']),
                         # "drillpipe_tension": d["metadata"]["drillpipe_tension"],
                         "comment": d["metadata"]["comment"],
                         # "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
                         "client": d["metadata"]["client"],
-                        # "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
                         'm_eq_dominant_direction': m_eq,
                     }
                 )
@@ -135,8 +137,6 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
                     "result_type": one_res_id_data["result_type"].unique()[0],
                     "method": one_res_id_data["method"].unique()[0],
                 },
-                # "categorical_attributes": ["location", "result_type", "method"],
-                # "continuous_attributes": [],
                 "scatters": [],
             }
             one_scatter = {
@@ -196,3 +196,19 @@ def get_advanced_analyses_results_routes(db_serv: database_service, prefix: str)
 def _get_vessel_dict(db_serv):
     documents = db_serv.get_all_documents("vessels")
     return {c["id"]: c["name"] for c in list(documents)}
+
+
+def _get_well_summary(well):
+    ret_str = f"name: {well['name']}\n"
+    ret_str += f"boundary-type: {well['well_boundary_type']}\n"
+    ret_str += f"well-design-type: {well['design_type']}\n"
+    ret_str += f"well-stiffness: {well['stiffness']}\n"
+    ret_str += f"support-feature: {well['feature']}\n"
+    ret_str += f"support-feature: {well['feature']}\n"
+    if type(well['soil']) is dict:
+        ret_str += f"soil-type: {well['soil']['soil_type']}\n"
+        ret_str += f"soil-version: {well['soil']['soil_version']}\n"
+        ret_str += f"soil-sensitivity: {well['soil']['soil_sensitivity']}\n"
+    else:
+        ret_str += "soil-type: None\n"
+    return ret_str
