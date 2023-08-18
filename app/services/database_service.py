@@ -44,8 +44,11 @@ class database_service(object):
             parameters=[{"name": "@id", "value": document_id}],
             enable_cross_partition_query=True,
         )
-
-        return [_remove_internal_dict_keys(c) for c in list(q_results)][0]
+        q_results = list(q_results)
+        if len(q_results) < 1:
+            return []
+        else:
+            return [_remove_internal_dict_keys(c) for c in list(q_results)][0]
 
     def delete_one_document_by_id(self, collection_name: str, document_id: str):
         """Deletes one document
