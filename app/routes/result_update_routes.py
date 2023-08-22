@@ -82,18 +82,18 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
             
         return response_values
 
-    @router.put("/update/update_one/{id}")
-    def put_modify_document(id: str, 
-                            updates: list[json_patch_modify]):
-        update_document = db_serv.get_one_document_by_id(
-            collection_name="analyses", document_id=id)
-        updates = [dict(c) for c in updates]
-        jsonpatch.apply_patch(update_document, updates, in_place=True)
-        db_serv.replace_one_document(
-            collection_name="analyses", 
-            doc_id=id, 
-            replace_item=update_document)
-        return update_document
+    # @router.put("/update/update_one/{id}")
+    # def put_modify_document(id: str, 
+    #                         updates: list[json_patch_modify]):
+    #     update_document = db_serv.get_one_document_by_id(
+    #         collection_name="analyses", document_id=id)
+    #     updates = [dict(c) for c in updates]
+    #     jsonpatch.apply_patch(update_document, updates, in_place=True)
+    #     db_serv.replace_one_document(
+    #         collection_name="analyses", 
+    #         doc_id=id, 
+    #         replace_item=update_document)
+    #     return update_document
  
 
     @router.put("/update/seastate_summary_update")
