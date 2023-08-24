@@ -70,6 +70,41 @@ class database_service(object):
         ret_value = container.delete_item(item=document_id, partition_key=document_id)
         return ret_value
 
+    def get_all_documents_short(self, collection_name: str, selected_keys: list):
+        """Gets all docuemtns from the given collection, returning only the document
+        keys in the selected_keys list
+
+        Parameters
+        ----------
+        collection_name : str
+            The name of the container to extract documents from.  Can be one of the 
+            following["analyses", "vessels", "settings"]
+
+        Returns
+        -------
+        list
+            A list of dictionarry containing all the documents in the given collection
+            
+        """
+        container = self.data_base_proxy.get_container_client(collection_name)
+        q_string = 'SELECT VALUE {'
+        firstiter = True
+        for selected_key in selected_keys:
+            if firstiter:
+                firstiter = False
+            else:
+                q_string += ","
+                
+            q_string += f'{selected_key}: d.{selected_key}'
+        q_string += "} FROM d"
+        items = container.query_items(
+                query=q_string,
+                parameters=[],
+                enable_cross_partition_query=True,
+            )
+
+        return list(items)
+
     def get_all_documents(self, collection_name: str):
         """_summary_
 

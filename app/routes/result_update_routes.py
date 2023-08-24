@@ -19,7 +19,7 @@ def add_detailed_routes( db_serv: database_service, router: APIRouter):
         if result_type is None:
             result_type = "simple"
         vessel_dict = _get_vessel_dict(db_serv)
-        documents = db_serv.get_all_documents("analyses")
+        documents = db_serv.get_all_documents_short("analyses", ["id", "metadata", 'general_results'])
 
         response_values = []
         for d in documents:
