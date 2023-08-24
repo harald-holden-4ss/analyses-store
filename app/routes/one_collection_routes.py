@@ -28,11 +28,11 @@ def get_router_one_collection(
         return db_serv.post_one_document(collecion_name, validated_body.dict())
 
     @router.delete(router_str + "/{id}")
-    def delete_analysis(id: str):
+    def delete(id: str):
         return db_serv.delete_one_document_by_id(collecion_name, id)
 
     @router.patch(router_str + "/{id}")
-    def patch_document(id: str, updates: list[json_patch_modify]):
+    def patch(id: str, updates: list[json_patch_modify]):
         """
             Updates one document with the updates given in the body.  All updates are given as
             a dict on the following form:
