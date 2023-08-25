@@ -1,9 +1,7 @@
 from fastapi import APIRouter
 import pandas as pd
 import numpy as np
-import jsonpatch
 from ..models.analyses import update_analyses_summary_input
-from ..models.jsonpatch import json_patch_modify
 from ..services.analysis_dict_manipulator import (
     update_seastate_summary_results,
     extract_all_summary_results,
@@ -12,15 +10,13 @@ from ..services.database_service import database_service
 from typing import Literal
 
 
-def add_detailed_routes( db_serv: database_service, router: APIRouter):
+def result_summary_routes(db_serv: database_service, router: APIRouter):
     @router.get("/summary/result_summary")
     def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None):
         if result_type is None:
             result_type = "simple"
         vessel_dict = _get_vessel_dict(db_serv)
         documents = db_serv.get_all_documents_short("analyses", ["id", "metadata", 'general_results'])
-#        print(documents[-1])
-#        print(len(documents))
 
         response_values = []
         for d in documents:

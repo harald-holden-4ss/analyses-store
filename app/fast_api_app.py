@@ -1,8 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from app.routes.one_collection_routes import get_router_one_collection
 from app.routes.result_update_routes import (
-    get_advanced_analyses_results_routes,
-    add_detailed_routes,
+    result_summary_routes,
 )
 from app.models.analyses import analysis_result, vessel
 from .services.database_service import database_service
@@ -20,7 +19,7 @@ def get_app():
     analyses_base_routes = get_router_one_collection(
         db_serv, "analyses", analysis_result
     )
-    analyses_routes = add_detailed_routes(db_serv, analyses_base_routes)
+    analyses_routes = result_summary_routes(db_serv, analyses_base_routes)
     api.include_router(vessels_routes)
     api.include_router(analyses_routes)
     app.include_router(api)
