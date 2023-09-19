@@ -11,6 +11,73 @@ from typing import Literal
 
 
 def result_summary_routes(db_serv: database_service, router: APIRouter):
+
+    @router.get("/{id}/seastate_results")
+    def get_seastate_results(id: str):
+        doc = db_serv.get_one_document_by_id("analyses", id)
+        summary_res = extract_all_summary_results(doc)
+        return summary_res
+
+    @router.get("/{id}/drio_time_series_ids")
+    def get_drio_time_series_ids(id: str):
+        doc = db_serv.get_one_document_by_id("analyses",  id)
+        all_time_series_with_drio_key = {}
+        for one_analysis in doc['all_seastate_results']:
+            dict_key = f"{one_analysis['meta']['location']}__{one_analysis['meta']['result_type']}"
+            
+            all_time_series_with_drio_key[dict_key]={
+                _get_hs_tp_string(hs=c["hs"], tp=c["tp"]):{
+                    'hs': c['hs'], 
+                    'tp':c['tp'], 
+                    'time_series_id': c['result']['time_series_id'],
+                    **one_analysis['meta'] } for c in one_analysis['data'] 
+                    if c['result']['time_series_id'] is not None}
+        return all_time_series_with_drio_key
+
+
+
+
+
+
+    @router.get("/{id}/dynamic_interpolator")
+    def get_dynamic_interpolator(id: str):
+        doc = db_serv.get_one_document_by_id("analyses", id)
+
+        summary_res = pd.DataFrame(extract_all_summary_results(doc))
+        summary_res["res_id"] = summary_res["location"].str.cat(
+            summary_res["result_type"].str.cat(summary_res["method"], sep="__"),
+            sep="__",
+        )
+        return_documents = []
+
+        for res_id, one_res_id_data in summary_res.groupby("res_id"):
+            return_document = {
+                "meta": {
+                    "location": one_res_id_data["location"].unique()[0],
+                    "result_type": one_res_id_data["result_type"].unique()[0],
+                    "method": one_res_id_data["method"].unique()[0],
+                },
+                "scatters": [],
+            }
+            one_scatter = {
+                "meta": {},
+                "data": [],
+            }
+            for _, one_seastate in one_res_id_data.iterrows():
+                one_scatter["data"].append(
+                    {
+                        "Hs": one_seastate["hs"],
+                        "Tp": one_seastate["tp"],
+                        "z": one_seastate["value"],
+                    }
+                )
+
+            return_document["scatters"].append(one_scatter)
+            return_documents.append(return_document)
+
+        return return_documents
+
+
     @router.get("/summary/result_summary")
     def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None):
         if result_type is None:
@@ -96,49 +163,6 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
         return_val = db_serv.replace_one_document("analyses", id, updated_doc)
         return return_val
 
-    @router.get("/seastate_results/{id}")
-    def get_seastate_summary(id: str):
-        doc = db_serv.get_one_document_by_id("analyses", id)
-        summary_res = extract_all_summary_results(doc)
-        return summary_res
-
-    @router.get("/dynamic_interpolator/{id}")
-    def get_dynamic_interpolator(id: str):
-        doc = db_serv.get_one_document_by_id("analyses", id)
-
-        summary_res = pd.DataFrame(extract_all_summary_results(doc))
-        summary_res["res_id"] = summary_res["location"].str.cat(
-            summary_res["result_type"].str.cat(summary_res["method"], sep="__"),
-            sep="__",
-        )
-        return_documents = []
-
-        for res_id, one_res_id_data in summary_res.groupby("res_id"):
-            return_document = {
-                "meta": {
-                    "location": one_res_id_data["location"].unique()[0],
-                    "result_type": one_res_id_data["result_type"].unique()[0],
-                    "method": one_res_id_data["method"].unique()[0],
-                },
-                "scatters": [],
-            }
-            one_scatter = {
-                "meta": {},
-                "data": [],
-            }
-            for _, one_seastate in one_res_id_data.iterrows():
-                one_scatter["data"].append(
-                    {
-                        "Hs": one_seastate["hs"],
-                        "Tp": one_seastate["tp"],
-                        "z": one_seastate["value"],
-                    }
-                )
-
-            return_document["scatters"].append(one_scatter)
-            return_documents.append(return_document)
-
-        return return_documents
 
     return router
 
@@ -180,6 +204,9 @@ def _get_vessel_dict(db_serv):
     documents = db_serv.get_all_documents("vessels")
     return {c["id"]: c["name"] for c in list(documents)}
 
+
+def _get_hs_tp_string(hs, tp):
+    return f'H{int(hs*100):04d}_T{int(tp*100):04d}'
 
 def _get_well_summary(well):
     ret_str = f"name: {well['name']}\n"
