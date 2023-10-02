@@ -105,6 +105,7 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                         "vessel": vessel_dict[d["metadata"]["vessel_id"]],
                         "project_id": d["metadata"]["project_id"],
                         "well_name": d["metadata"]["well"]["name"],
+                        "version": d["metadata"]["version"],
                         "wave_direction_relative_to_rig": float(np.abs(
                             d["metadata"]["wave_direction"] -
                             d["metadata"]["vessel_heading"])),
