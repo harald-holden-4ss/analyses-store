@@ -84,6 +84,8 @@ class update_analyses_summary_input(BaseModel, extra="forbid"):
 
 class general_results(BaseModel, extra="forbid"):
     m_eq_dominant_direction: float = Field(None, ge=0.0)
+    m_eq_local_scatter_dom_dir: float = Field(None, ge=0.0)
+    m_eq_NORSOK_scatter_dom_dir: float = Field(None, ge=0.0)
     m_extreme_drilling: float = Field(None, ge=0.0)
     m_extreme_nondrilling: float = Field(None, ge=0.0)
 
