@@ -92,10 +92,14 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                     xt_string = "Yes"
                 else:
                     xt_string = "No"
-                if 'm_eq_dominant_direction' in d["general_results"]:
-                    m_eq = d["general_results"]['m_eq_dominant_direction']
+                if 'm_eq_local_scatter_dom_dir' in d["general_results"]:
+                    m_eq_local_scatter = d["general_results"]['m_eq_local_scatter_dom_dir']
                 else:
-                    m_eq = None
+                    m_eq_local_scatter = None
+                if 'm_eq_NORSOK_scatter_dom_dir' in d['general_results']:
+                    m_eq_NORSOK_scatter_dom_dir = d["general_results"]['m_eq_NORSOK_scatter_dom_dir']
+                else:
+                    m_eq_NORSOK_scatter_dom_dir = None
 #                print(i, d["id"],d["metadata"]["vessel_id"])
                 response_values.append(
                     {
@@ -106,7 +110,7 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                         "project_id": d["metadata"]["project_id"],
                         "well_name": d["metadata"]["well"]["name"],
                         "version": d["metadata"]["version"],
-                        "wave_direction_relative_to_rig": float(np.abs(
+                        "wave_dir_rel_to_rig": float(np.abs(
                             d["metadata"]["wave_direction"] -
                             d["metadata"]["vessel_heading"])),
                         "current": d["metadata"]["current"],
@@ -115,7 +119,8 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                         "well_data": _get_well_summary(d['metadata']['well']),
                         "comment": d["metadata"]["comment"],
                         "client": d["metadata"]["client"],
-                        'm_eq_dominant_direction': m_eq,
+                        'm_eq_local_scatter_dom_dir': m_eq_local_scatter,
+                        'm_eq_NORSOK_scatter_dom_dir': m_eq_NORSOK_scatter_dom_dir,
                     }
                 )
             elif result_type == "detailed":
