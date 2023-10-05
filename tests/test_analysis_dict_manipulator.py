@@ -33,7 +33,7 @@ def test_dict():
             "overpull": 490500.0,
             "drillpipe_tension": 738750.0,
         },
-        "general_results": {"m_eq_dominant_direction": 1000.0},
+        "general_results": {"m_eq_NORSOK_dom_dir": 1000.0},
         "all_seastate_results": [
             {
                 "meta": {
