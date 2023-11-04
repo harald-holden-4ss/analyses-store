@@ -72,4 +72,30 @@ async def get_user(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Token is invalid")
 
 
-authorized_user = Depends(get_user)
+def check_acceptable_organization(user: User = Depends(get_user))-> User:
+    """
+    Check if user with organization ID has access
+
+    Parameters
+    ----------
+    user : User
+        The user object to be checked
+
+    Returns
+    -------
+    User
+        The user object containing name, email, and organization ID.
+
+    Raises
+    ------
+    HTTPException
+        If the user organization is not authorized
+    """
+    if user.organizationId == "2c4ee562-6261-4018-a1b1-8837ab526944":
+        return user
+    else: 
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, 
+                            detail=f"Authorization refused for organization id {user.organizationId}")
+
+
+authorized_user = Depends(check_acceptable_organization)
