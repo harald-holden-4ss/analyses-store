@@ -8,13 +8,15 @@ from ..services.analysis_dict_manipulator import (
 )
 from ..services.database_service import database_service
 from typing import Literal
-
+from ..auth import authorized_user
+from ..models.user import User
 
 def result_summary_routes(db_serv: database_service, router: APIRouter):
 
     @router.get("/{id}/seastate_results")
-    def get_seastate_results(id: str):
+    def get_seastate_results( id: str):
         doc = db_serv.get_one_document_by_id("analyses", id)
+        print(user)
         summary_res = extract_all_summary_results(doc)
         return summary_res
 
@@ -79,7 +81,8 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
 
 
     @router.get("/summary/result_summary")
-    def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None):
+    def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None, user: User = authorized_user):
+        print(user)
         if result_type is None:
             result_type = "simple"
         vessel_dict = _get_vessel_dict(db_serv)
