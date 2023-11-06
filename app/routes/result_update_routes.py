@@ -16,7 +16,6 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
     @router.get("/{id}/seastate_results")
     def get_seastate_results( id: str):
         doc = db_serv.get_one_document_by_id("analyses", id)
-        print(user)
         summary_res = extract_all_summary_results(doc)
         return summary_res
 
