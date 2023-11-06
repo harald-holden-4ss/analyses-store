@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from app.routes.one_collection_routes import get_router_one_collection
+from app.routes.vessel_routes import get_vessel_router
 from app.routes.result_update_routes import (
     result_summary_routes,
 )
@@ -10,12 +11,12 @@ from fastapi.responses import JSONResponse
 from .models.user import User
 
 
-def get_app():
-    db_serv = database_service()
-    print(db_serv)
+def get_app(db_serv=None):
+    if db_serv is None:
+        db_serv = database_service()
     app = FastAPI()
     api = APIRouter(prefix="/api", dependencies=[authorized_user])  # 
-    vessels_routes = get_router_one_collection(db_serv, "vessels", vessel)
+    vessels_routes = get_vessel_router(db_serv, vessel)
     analyses_base_routes = get_router_one_collection(
         db_serv, "analyses", analysis_result
     )
@@ -26,7 +27,7 @@ def get_app():
 
     @app.get("/user")
     async def user(user: User = authorized_user):
-        return JSONResponse(user.dict())
+        return JSONResponse(user.model_dump())
 
     @app.get("/ping")
     def pingpong():

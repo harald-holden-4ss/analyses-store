@@ -3,21 +3,28 @@ from ..services.database_service import database_service
 from ..models.jsonpatch import json_patch_modify
 import jsonpatch
 def get_router_one_collection(
-    db_serv: database_service, collecion_name: str, validation_object: object
+    db_serv: database_service, 
+    collecion_name: str, 
+    validation_object: object,
+    add_route_list = None
 ):
     router = APIRouter(
         prefix=f"/{collecion_name}",
         tags=[collecion_name],
     )
     router_str = f""
+    if add_route_list is None:
+        add_route_list = ['get_all', 'get_by_id']
+    
+    if 'get_all' in add_route_list:
+        @router.get(router_str)
+        def get_all():
+            return db_serv.get_all_documents(collecion_name)
 
-    @router.get(router_str)
-    def get_all():
-        return db_serv.get_all_documents(collecion_name)
-
-    @router.get(router_str + "/{id}")
-    def get_one(id: str):
-        return db_serv.get_one_document_by_id(collecion_name, id)
+    if 'get_by_id' in add_route_list:
+        @router.get(router_str + "/{id}")
+        def get_one(id: str):
+            return db_serv.get_one_document_by_id(collecion_name, id)
 
     @router.post(router_str)
     def post(validated_body: validation_object):
