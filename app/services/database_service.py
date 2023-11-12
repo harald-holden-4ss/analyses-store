@@ -242,8 +242,9 @@ class database_service(object):
 
         Returns
         -------
-        dict
-            A dict containing the document inserted into the database
+        list
+            A list of dicts containing the analysis id, one for each analysis with the 
+            given vessel
         """
         container = self.data_base_proxy.get_container_client("analyses")
         q_string = "SELECT d.id, d.metadata.vessel_id FROM d WHERE  d.metadata.vessel_id =@vessel_id"
