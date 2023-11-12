@@ -1,7 +1,8 @@
 from azure.cosmos import CosmosClient
 import uuid
 import os
-
+from ..models.jsonpatch import json_patch_modify
+import jsonpatch
 
 class database_service(object):
     """Service object to handle data stored in the azure cosmos db document
@@ -69,6 +70,7 @@ class database_service(object):
         container = self.data_base_proxy.get_container_client(collection_name)
         ret_value = container.delete_item(item=document_id, partition_key=document_id)
         return ret_value
+            
 
     def get_all_documents_short(self, collection_name: str, selected_keys: list):
         """Gets all docuemtns from the given collection, returning only the document
@@ -165,14 +167,92 @@ class database_service(object):
 
         Returns
         -------
-        _type_
-            _description_
+        dict
+            A dict containing the document inserted into the database
         """
         document["id"] = str(uuid.uuid4())
         container = self.data_base_proxy.get_container_client(collection_name)
         ret_value = container.create_item(body=document)
         return_dict = _remove_internal_dict_keys(ret_value)
         return return_dict
+
+    def patch_one_document(self, collection_name: str, 
+                           document_id: str, updates: list[dict]):
+        """Patch a documnet in the database using the RFC 6902 patch syntax 
+
+        Parameters
+        ----------
+         collection_name : str
+            The name of the container to extract documents from.  Can be one of the 
+            following["analyses", "vessels", "settings"]
+        document_id : str
+            a string containing the guid of the document to be patched
+        updates: list[dict]
+            a list of dicts containing the patches to be done.  All updates are given as
+            a dict on the following form:
+                [
+                    {
+                        "op": string with the operation to performe ("add", "replace", "remove") 
+                        "path": string with the path where the operation should be applied 
+                        "value": the value (for replace or add operations)
+                
+                    }
+                ] 
+
+        Returns
+        -------
+        dict
+            A dict containing the document inserted into the database
+        """
+        update_document = self.get_one_document_by_id(
+                collection_name=collection_name, document_id=document_id)
+        
+        update_document = jsonpatch.apply_patch(update_document, updates)
+        
+        return self.replace_one_document(
+            collection_name=collection_name, 
+            doc_id=document_id,
+            replace_item=update_document)
+    def get_analysis_id_by_vesselid(self, vessel_id):
+        """Patch a documnet in the database using the RFC 6902 patch syntax 
+
+        Parameters
+        ----------
+         collection_name : str
+            The name of the container to extract documents from.  Can be one of the 
+            following["analyses", "vessels", "settings"]
+        document_id : str
+            a string containing the guid of the document to be patched
+        updates: list[dict]
+            a list of dicts containing the patches to be done.  All updates are given as
+            a dict on the following form:
+                [
+                    {
+                        "op": string with the operation to performe ("add", "replace", "remove") 
+                        "path": string with the path where the operation should be applied 
+                        "value": the value (for replace or add operations)
+                
+                    }
+                ] 
+
+        Returns
+        -------
+        dict
+            A dict containing the document inserted into the database
+        """
+        container = self.data_base_proxy.get_container_client("analyses")
+        q_string = "SELECT d.id, d.metadata.vessel_id FROM d WHERE  d.metadata.vessel_id =@vessel_id"
+        q_results = container.query_items(
+            query=q_string,
+            parameters=[{"name": "@vessel_id", "value": vessel_id}],
+            enable_cross_partition_query=True,
+        )
+        q_results = list(q_results)
+        if len(q_results) < 1:
+            return []
+        else:
+            return q_results
+    
 
 
 def _remove_internal_dict_keys(inp_dict):

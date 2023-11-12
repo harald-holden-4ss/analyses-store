@@ -122,3 +122,61 @@ def test_database_service_replace_one_document(remove_dict_keys_mock, mock_sql_c
     database_service_mockedDB.data_base_proxy.get_container_client.assert_called_once_with(
         "dummy_collection"
     )
+
+
+@patch("app.services.database_service.jsonpatch")
+@patch("app.services.database_service._remove_internal_dict_keys")
+def test_database_service_replace_one_document(remove_dict_keys_mock,
+                                               jsonpatch_mock, mock_sql_client):
+    remove_dict_keys_mock.side_effect = ["res_1", "res_2", "res_3", "res_4", "res_5"]
+    _, _, database_service_mockedDB = mock_sql_client
+    database_service_mockedDB.data_base_proxy = MagicMock()
+    database_service_mockedDB.data_base_proxy.replace_item.return_value = {
+        'title': 'return_replace_document'}
+    database_service_mockedDB.get_one_document_by_id = MagicMock(
+        return_value={'title': 'document_from_db'})
+    database_service_mockedDB.replace_one_document = MagicMock(
+        return_value={'title': 'return_value_from_dbserv_replace'})
+    jsonpatch_mock.apply_patch.return_value = {'doc_id':'patch_ret_doc'}
+    patch_obj = [{
+        "op": "replace",
+        "path": "my_path/", 
+        "value": "my_value"}]
+    res = database_service_mockedDB.patch_one_document(
+        "analysis", "my_doc_id", patch_obj)
+    database_service_mockedDB.get_one_document_by_id.assert_called_once_with(
+        collection_name="analysis", document_id="my_doc_id")
+    jsonpatch_mock.apply_patch.assert_called_once_with(
+        {'title': 'document_from_db'}, patch_obj)
+    database_service_mockedDB.replace_one_document.assert_called_once_with(
+            collection_name="analysis", 
+            doc_id="my_doc_id",
+            replace_item={'doc_id':'patch_ret_doc'})
+    assert res == {'title': 'return_value_from_dbserv_replace'}
+
+
+def test_get_analysis_id_by_vesselid(mock_sql_client):
+    cosmos_client_mock, os_mock, serv = mock_sql_client
+    cosmos_client_mock.data_base_proxy = MagicMock()
+    cosmos_container_client_mock = MagicMock(id="CosmosContainerClientMock")
+    serv.data_base_proxy = MagicMock()
+
+    cosmos_container_client_mock.query_items.return_value = [
+        {'foo1': 'bar1'},
+        {'foo1': 'bar1'}]
+    serv.data_base_proxy.get_container_client.return_value = (
+        cosmos_container_client_mock
+    )
+    response = serv.get_analysis_id_by_vesselid("my_vessel_id")
+    cosmos_container_client_mock.query_items.assert_called_once_with(
+        query="SELECT d.id, d.metadata.vessel_id FROM d WHERE  d.metadata.vessel_id =@vessel_id",
+        parameters=[{"name": "@vessel_id", "value": "my_vessel_id"}],
+        enable_cross_partition_query=True,
+         
+    )
+    assert response == [
+        {'foo1': 'bar1'},
+        {'foo1': 'bar1'}]
+    print(response)
+
+
