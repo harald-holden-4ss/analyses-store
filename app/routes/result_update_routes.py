@@ -26,19 +26,15 @@ from ..models.user import User
 #         all_time_series_with_drio_key = {}
 #         for one_analysis in doc['all_seastate_results']:
 #             dict_key = f"{one_analysis['meta']['location']}__{one_analysis['meta']['result_type']}"
-            
+
 #             all_time_series_with_drio_key[dict_key]={
 #                 _get_hs_tp_string(hs=c["hs"], tp=c["tp"]):{
-#                     'hs': c['hs'], 
-#                     'tp':c['tp'], 
+#                     'hs': c['hs'],
+#                     'tp':c['tp'],
 #                     'time_series_id': c['result']['time_series_id'],
-#                     **one_analysis['meta'] } for c in one_analysis['data'] 
+#                     **one_analysis['meta'] } for c in one_analysis['data']
 #                     if c['result']['time_series_id'] is not None}
 #         return all_time_series_with_drio_key
-
-
-
-
 
 
 #     @router.get("/{id}/dynamic_interpolator")
@@ -149,7 +145,6 @@ from ..models.user import User
 #         return response_values
 
 
-
 #     @router.put("/update/seastate_summary_update")
 #     def put_update_summary(updates: update_analyses_summary_input):
 #         """
@@ -189,7 +184,7 @@ from ..models.user import User
 
 #         return [
 #             {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-#         ] 
+#         ]
 
 #     @router.put("/seastate_summary_update")
 #     def put_update_summary(updates: update_analyses_summary_input):

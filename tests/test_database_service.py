@@ -81,7 +81,7 @@ def test_database_service_get_all_documents(remove_dict_keys_mock, mock_sql_clie
         {"key1": "key1item1", "key2": "key2item1"},
         {"key1": "key1item2", "key2": "key2item2"},
         {"key1": "key1item3", "key2": "key2item3"},
-        ]
+    ]
     _, _, database_service_mockedDB = mock_sql_client
     database_service_mockedDB.data_base_proxy = MagicMock()
     cosmos_container_client_mock = MagicMock(id="CosmosContainerClientMock")
@@ -89,11 +89,9 @@ def test_database_service_get_all_documents(remove_dict_keys_mock, mock_sql_clie
         cosmos_container_client_mock
     )
     cosmos_container_client_mock.read_all_items.return_value = db_query_results
-    return_value = database_service_mockedDB.get_all_documents(
-        "dummy_collection"
-    )
+    return_value = database_service_mockedDB.get_all_documents("dummy_collection")
     assert return_value == ["res_1", "res_2", "res_3"]
-    cosmos_container_client_mock.read_all_items.assert_called_once_with( )
+    cosmos_container_client_mock.read_all_items.assert_called_once_with()
     database_service_mockedDB.data_base_proxy.get_container_client.assert_called_once_with(
         "dummy_collection"
     )
@@ -111,14 +109,14 @@ def test_database_service_replace_one_document(remove_dict_keys_mock, mock_sql_c
     )
     cosmos_container_client_mock.replace_item.return_value = db_query_results
     return_value = database_service_mockedDB.replace_one_document(
-        collection_name="dummy_collection", 
-        doc_id="dummy_doc_id", 
-        replace_item={"foo": "bar"}
+        collection_name="dummy_collection",
+        doc_id="dummy_doc_id",
+        replace_item={"foo": "bar"},
     )
     assert return_value == db_query_results
     cosmos_container_client_mock.replace_item.assert_called_once_with(
         item="dummy_doc_id", body={"foo": "bar"}
-     )
+    )
     database_service_mockedDB.data_base_proxy.get_container_client.assert_called_once_with(
         "dummy_collection"
     )
@@ -126,33 +124,38 @@ def test_database_service_replace_one_document(remove_dict_keys_mock, mock_sql_c
 
 @patch("app.services.database_service.jsonpatch")
 @patch("app.services.database_service._remove_internal_dict_keys")
-def test_database_service_replace_one_document(remove_dict_keys_mock,
-                                               jsonpatch_mock, mock_sql_client):
+def test_database_service_replace_one_document(
+    remove_dict_keys_mock, jsonpatch_mock, mock_sql_client
+):
     remove_dict_keys_mock.side_effect = ["res_1", "res_2", "res_3", "res_4", "res_5"]
     _, _, database_service_mockedDB = mock_sql_client
     database_service_mockedDB.data_base_proxy = MagicMock()
     database_service_mockedDB.data_base_proxy.replace_item.return_value = {
-        'title': 'return_replace_document'}
+        "title": "return_replace_document"
+    }
     database_service_mockedDB.get_one_document_by_id = MagicMock(
-        return_value={'title': 'document_from_db'})
+        return_value={"title": "document_from_db"}
+    )
     database_service_mockedDB.replace_one_document = MagicMock(
-        return_value={'title': 'return_value_from_dbserv_replace'})
-    jsonpatch_mock.apply_patch.return_value = {'doc_id':'patch_ret_doc'}
-    patch_obj = [{
-        "op": "replace",
-        "path": "my_path/", 
-        "value": "my_value"}]
+        return_value={"title": "return_value_from_dbserv_replace"}
+    )
+    jsonpatch_mock.apply_patch.return_value = {"doc_id": "patch_ret_doc"}
+    patch_obj = [{"op": "replace", "path": "my_path/", "value": "my_value"}]
     res = database_service_mockedDB.patch_one_document(
-        "analysis", "my_doc_id", patch_obj)
+        "analysis", "my_doc_id", patch_obj
+    )
     database_service_mockedDB.get_one_document_by_id.assert_called_once_with(
-        collection_name="analysis", document_id="my_doc_id")
+        collection_name="analysis", document_id="my_doc_id"
+    )
     jsonpatch_mock.apply_patch.assert_called_once_with(
-        {'title': 'document_from_db'}, patch_obj)
+        {"title": "document_from_db"}, patch_obj
+    )
     database_service_mockedDB.replace_one_document.assert_called_once_with(
-            collection_name="analysis", 
-            doc_id="my_doc_id",
-            replace_item={'doc_id':'patch_ret_doc'})
-    assert res == {'title': 'return_value_from_dbserv_replace'}
+        collection_name="analysis",
+        doc_id="my_doc_id",
+        replace_item={"doc_id": "patch_ret_doc"},
+    )
+    assert res == {"title": "return_value_from_dbserv_replace"}
 
 
 def test_get_analysis_id_by_vesselid(mock_sql_client):
@@ -162,8 +165,9 @@ def test_get_analysis_id_by_vesselid(mock_sql_client):
     serv.data_base_proxy = MagicMock()
 
     cosmos_container_client_mock.query_items.return_value = [
-        {'foo1': 'bar1'},
-        {'foo1': 'bar1'}]
+        {"foo1": "bar1"},
+        {"foo1": "bar1"},
+    ]
     serv.data_base_proxy.get_container_client.return_value = (
         cosmos_container_client_mock
     )
@@ -172,11 +176,6 @@ def test_get_analysis_id_by_vesselid(mock_sql_client):
         query="SELECT d.id, d.metadata.vessel_id FROM d WHERE  d.metadata.vessel_id =@vessel_id",
         parameters=[{"name": "@vessel_id", "value": "my_vessel_id"}],
         enable_cross_partition_query=True,
-         
     )
-    assert response == [
-        {'foo1': 'bar1'},
-        {'foo1': 'bar1'}]
+    assert response == [{"foo1": "bar1"}, {"foo1": "bar1"}]
     print(response)
-
-
