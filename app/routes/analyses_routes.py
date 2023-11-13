@@ -1,44 +1,46 @@
-from fastapi import APIRouter
 import pandas as pd
 import numpy as np
-from ..models.analyses import update_analyses_summary_input
+from .one_collection_routes import get_router_one_collection
+from ..services.database_service import database_service
+from app.models.analyses import analysis_result
 from ..services.analysis_dict_manipulator import (
     update_seastate_summary_results,
     extract_all_summary_results,
 )
-from ..services.database_service import database_service
+
 from typing import Literal
 from ..auth import authorized_user
 from ..models.user import User
+from ..models.analyses import update_analyses_summary_input
 
-def result_summary_routes(db_serv: database_service, router: APIRouter):
+
+def get_analysis_router(db_serv: database_service):
+    router = get_router_one_collection(db_serv, "analyses", analysis_result)
 
     @router.get("/{id}/seastate_results")
-    def get_seastate_results( id: str):
+    def get_seastate_results(id: str):
         doc = db_serv.get_one_document_by_id("analyses", id)
         summary_res = extract_all_summary_results(doc)
         return summary_res
 
     @router.get("/{id}/drio_time_series_ids")
     def get_drio_time_series_ids(id: str):
-        doc = db_serv.get_one_document_by_id("analyses",  id)
+        doc = db_serv.get_one_document_by_id("analyses", id)
         all_time_series_with_drio_key = {}
-        for one_analysis in doc['all_seastate_results']:
+        for one_analysis in doc["all_seastate_results"]:
             dict_key = f"{one_analysis['meta']['location']}__{one_analysis['meta']['result_type']}"
-            
-            all_time_series_with_drio_key[dict_key]={
-                _get_hs_tp_string(hs=c["hs"], tp=c["tp"]):{
-                    'hs': c['hs'], 
-                    'tp':c['tp'], 
-                    'time_series_id': c['result']['time_series_id'],
-                    **one_analysis['meta'] } for c in one_analysis['data'] 
-                    if c['result']['time_series_id'] is not None}
+
+            all_time_series_with_drio_key[dict_key] = {
+                _get_hs_tp_string(hs=c["hs"], tp=c["tp"]): {
+                    "hs": c["hs"],
+                    "tp": c["tp"],
+                    "time_series_id": c["result"]["time_series_id"],
+                    **one_analysis["meta"],
+                }
+                for c in one_analysis["data"]
+                if c["result"]["time_series_id"] is not None
+            }
         return all_time_series_with_drio_key
-
-
-
-
-
 
     @router.get("/{id}/dynamic_interpolator")
     def get_dynamic_interpolator(id: str):
@@ -78,14 +80,17 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
 
         return return_documents
 
-
     @router.get("/summary/result_summary")
-    def get_result_summary(result_type: Literal["simple", "detailed", "full"] = None, user: User = authorized_user):
-        print(user)
+    def get_result_summary(
+        result_type: Literal["simple", "detailed", "full"] = None,
+        user: User = authorized_user,
+    ):
         if result_type is None:
             result_type = "simple"
         vessel_dict = _get_vessel_dict(db_serv)
-        documents = db_serv.get_all_documents_short("analyses", ["id", "metadata", 'general_results'])
+        documents = db_serv.get_all_documents_short(
+            "analyses", ["id", "metadata", "general_results"]
+        )
 
         response_values = []
         for d in documents:
@@ -94,11 +99,11 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                     xt_string = "Yes"
                 else:
                     xt_string = "No"
-                if 'm_eq_dominant_direction' in d["general_results"]:
-                    m_eq = d["general_results"]['m_eq_dominant_direction']
+                if "m_eq_dominant_direction" in d["general_results"]:
+                    m_eq = d["general_results"]["m_eq_dominant_direction"]
                 else:
                     m_eq = None
-#                print(i, d["id"],d["metadata"]["vessel_id"])
+                #                print(i, d["id"],d["metadata"]["vessel_id"])
                 response_values.append(
                     {
                         "id": d["id"],
@@ -108,16 +113,19 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                         "project_id": d["metadata"]["project_id"],
                         "well_name": d["metadata"]["well"]["name"],
                         "version": d["metadata"]["version"],
-                        "wave_direction_relative_to_rig": float(np.abs(
-                            d["metadata"]["wave_direction"] -
-                            d["metadata"]["vessel_heading"])),
+                        "wave_direction_relative_to_rig": float(
+                            np.abs(
+                                d["metadata"]["wave_direction"]
+                                - d["metadata"]["vessel_heading"]
+                            )
+                        ),
                         "current": d["metadata"]["current"],
                         "xt": xt_string,
                         "overpull": d["metadata"]["overpull"],
-                        "well_data": _get_well_summary(d['metadata']['well']),
+                        "well_data": _get_well_summary(d["metadata"]["well"]),
                         "comment": d["metadata"]["comment"],
                         "client": d["metadata"]["client"],
-                        'm_eq_dominant_direction': m_eq,
+                        "m_eq_dominant_direction": m_eq,
                     }
                 )
             elif result_type == "detailed":
@@ -136,18 +144,19 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
                         "overpull": d["metadata"]["overpull"],
                         "drillpipe_tension": d["metadata"]["drillpipe_tension"],
                         "comment": d["metadata"]["comment"],
-                        "offset_percent_of_wd":d["metadata"]["offset_percent_of_wd"],
+                        "offset_percent_of_wd": d["metadata"]["offset_percent_of_wd"],
                         "client": d["metadata"]["client"],
-                        "well_boundary_type": d["metadata"]["well"]["well_boundary_type"],
+                        "well_boundary_type": d["metadata"]["well"][
+                            "well_boundary_type"
+                        ],
                         **d["general_results"],
                     }
                 )
             else:
-                response_values.append({"id": d["id"], **d["metadata"],
-                                        **d["general_results"]})
+                response_values.append(
+                    {"id": d["id"], **d["metadata"], **d["general_results"]}
+                )
         return response_values
-
-
 
     @router.put("/update/seastate_summary_update")
     def put_update_summary(updates: update_analyses_summary_input):
@@ -166,40 +175,6 @@ def result_summary_routes(db_serv: database_service, router: APIRouter):
         return_val = db_serv.replace_one_document("analyses", id, updated_doc)
         return return_val
 
-
-    return router
-
-
-def get_advanced_analyses_results_routes(db_serv: database_service, prefix: str):
-    router = APIRouter(
-        prefix="/" + prefix,
-        tags=["seastate_summary"],
-    )
-
-    @router.get("/seastate_summary_results/{id}")
-    def get_seastate_summary(id: str):
-        doc = db_serv.get_one_document_by_id("analyses", id)
-        summary_res = extract_all_summary_results(doc)
-        return summary_res
-
-    @router.get("/analysesmeta")
-    def get_analysesmeta():
-        documents = db_serv.get_all_documents("analyses")
-
-        return [
-            {"id": c["id"], **c["metadata"], **c["general_results"]} for c in documents
-        ] 
-
-    @router.put("/seastate_summary_update")
-    def put_update_summary(updates: update_analyses_summary_input):
-        id = str(updates.dict()["id"])
-        old_document = db_serv.get_one_document_by_id("analyses", id)
-        updated_doc = update_seastate_summary_results(
-            old_document, updates.dict()["updates"]
-        )
-        return_val = db_serv.replace_one_document("analyses", id, updated_doc)
-        return return_val
-
     return router
 
 
@@ -209,7 +184,8 @@ def _get_vessel_dict(db_serv):
 
 
 def _get_hs_tp_string(hs, tp):
-    return f'H{int(hs*100):04d}_T{int(tp*100):04d}'
+    return f"H{int(hs*100):04d}_T{int(tp*100):04d}"
+
 
 def _get_well_summary(well):
     ret_str = f"name: {well['name']}\n"
@@ -218,7 +194,7 @@ def _get_well_summary(well):
     ret_str += f"well-stiffness: {well['stiffness']}\n"
     ret_str += f"support-feature: {well['feature']}\n"
     ret_str += f"support-feature: {well['feature']}\n"
-    if type(well['soil']) is dict:
+    if type(well["soil"]) is dict:
         ret_str += f"soil-type: {well['soil']['soil_type']}\n"
         ret_str += f"soil-version: {well['soil']['soil_version']}\n"
         ret_str += f"soil-sensitivity: {well['soil']['soil_sensitivity']}\n"

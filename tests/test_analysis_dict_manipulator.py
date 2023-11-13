@@ -347,5 +347,17 @@ def test_update_one_seastate_sumamry_value(filter_dict_mock, update_summary_mock
         method="dummy_method",
         value=1.0,
     )
-
-    print(result)
+    assert result == {
+        "all_seastate_results": [
+            {
+                "foo": "one",
+                "data": [
+                    "data_one",
+                    {"result": {"summary_values": "hei"}},
+                    "data_three",
+                ],
+            },
+            "one",
+            "two",
+        ]
+    }
