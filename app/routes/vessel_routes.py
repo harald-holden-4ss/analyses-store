@@ -18,7 +18,6 @@ def get_vessel_router(db_serv: database_service):
     @ret_router.delete("/{id}")
     def delete(id: str):
         try:
-            print(db_serv)
             analyses_with_vessel = db_serv.get_analysis_id_by_vesselid(id)
             num_analyses_with_vessel = len(analyses_with_vessel)
 

@@ -8,7 +8,6 @@ from ..services.analysis_dict_manipulator import (
     extract_all_summary_results,
 )
 
-# from ..services.database_service import database_service
 from typing import Literal
 from ..auth import authorized_user
 from ..models.user import User
@@ -17,7 +16,6 @@ from ..models.analyses import update_analyses_summary_input
 
 def get_analysis_router(db_serv: database_service):
     router = get_router_one_collection(db_serv, "analyses", analysis_result)
-    #    return_routes = result_summary_routes(db_serv, analyses_base_routes)
 
     @router.get("/{id}/seastate_results")
     def get_seastate_results(id: str):
