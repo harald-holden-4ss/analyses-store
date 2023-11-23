@@ -2,7 +2,8 @@ from fastapi import FastAPI, APIRouter
 from app.routes.one_collection_routes import get_router_one_collection
 from app.routes.vessel_routes import get_vessel_router
 from app.routes.analyses_routes import get_analysis_router
-
+from app.routes.soil_routes import get_soil_router
+from app.routes.analysis_input_routes import get_analysis_input_router
 # from app.routes.result_update_routes import (
 #     result_summary_routes,
 # )
@@ -21,6 +22,8 @@ def get_app(db_serv=None):
     analyses_routes = get_analysis_router(db_serv)
     api.include_router(vessels_routes)
     api.include_router(analyses_routes)
+    api.include_router(get_soil_router(db_serv))
+    api.include_router(get_analysis_input_router(db_serv))
     app.include_router(api)
 
     @app.get("/user")

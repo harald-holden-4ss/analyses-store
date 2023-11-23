@@ -1,0 +1,15 @@
+{
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "vessel_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "input_data_file_location": "http://adgadgaadja",
+    "data":{
+      "target_overpull":{"value":26.0, "unit":"mT"},
+      "bop_L2":{"value":9.694, "unit":"m"},
+      "lmrp_submerged_weight":{"value":48000, "unit":"kg"},
+      "flex_joint_stiffness": {"value":88.2, "unit":"kNm/deg"},
+      "OD_riser_adapter":{"value":0.522, "unit":"m"},
+      "ID_riser_adapter":{"value":0.478, "unit":"m"}
+    },
+    "tally_sheet_name": "sheet1",
+    "comments": "thisisacomment"
+  }

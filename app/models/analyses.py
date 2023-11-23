@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from uuid import uuid4, UUID
-from typing import List, Literal
-
+from typing import List, Literal, Optional
+from .general_configs import ALLOWABLE_UNITS
 
 DEFAULT_UNITS = {
     "angle rx": "deg",
@@ -65,7 +65,7 @@ ALLOWABLE_RESULT_TYPES = Literal[
     "velocity z",
 ]
 
-ALLOWABLE_UNITS = Literal["m", "N", "kN", "Nm", "kNm", "deg", "rad", "m/s"]
+#ALLOWABLE_UNITS = Literal["m", "N", "kN", "Nm", "kNm", "deg", "rad", "m/s"]
 
 
 class update_analysis_summary_input(BaseModel, extra="forbid"):
@@ -83,11 +83,11 @@ class update_analyses_summary_input(BaseModel, extra="forbid"):
 
 
 class general_results(BaseModel, extra="forbid"):
-    m_eq_dominant_direction: float = Field(None, ge=0.0)
-    m_eq_local_scatter_dom_dir: float = Field(None, ge=0.0)
-    m_eq_NORSOK_scatter_dom_dir: float = Field(None, ge=0.0)
-    m_extreme_drilling: float = Field(None, ge=0.0)
-    m_extreme_nondrilling: float = Field(None, ge=0.0)
+    m_eq_dominant_direction: Optional[float] = Field(None, ge=0.0)
+    m_eq_local_scatter_dom_dir: Optional[float] = Field(None, ge=0.0)
+    m_eq_NORSOK_scatter_dom_dir: Optional[float] = Field(None, ge=0.0)
+    m_extreme_drilling: Optional[float] = Field(None, ge=0.0)
+    m_extreme_nondrilling:  Optional[float] = Field(None, ge=0.0)
 
     # class Config:
     #     schema_extra = {"example": {"M_eq_dominant_direction": 1000.0}}
@@ -114,16 +114,12 @@ class well_info(BaseModel, extra="forbid"):
     soil: soil_data | None = None
 
 
-class vessel(BaseModel, extra="forbid"):
-    id: UUID | None = None
-    name: str = Field(min_length=1)
-    imo: int = Field(gt=0)
-
 
 class analyses_metadata(BaseModel, extra="forbid"):
     responsible_engineer: str
     project_id: int = Field(gt=1000)
     well: well_info
+    analysis_input_id: Optional[UUID] = None
     version: str = Field(min_length=1)
     analysis_type: str
     simulation_length: float = Field(gt=0.0)
@@ -138,9 +134,15 @@ class analyses_metadata(BaseModel, extra="forbid"):
     soil_profile: str = Field(min_length=1)
     overpull: float = Field(ge=0.0)
     drillpipe_tension: float = Field(ge=0.0)
-    comment: str = None
+    comment: str  | None = None
     offset_percent_of_wd: float = Field(ge=0.0)
     client: str = Field(None, min_length=1)
+
+    @field_serializer('analysis_input_id')
+    def analysis_input_id_serializer(self, analysis_input_id: UUID, _info):
+        if analysis_input_id is None:
+            return None
+        return str(analysis_input_id)
 
 
 class summary_value_type(BaseModel, extra="forbid"):
@@ -150,7 +152,7 @@ class summary_value_type(BaseModel, extra="forbid"):
 
 class one_seastate_result(BaseModel, extra="forbid"):
     summary_values: List[summary_value_type]
-    time_series_id: str = None
+    time_series_id: Optional[str] = None
 
 
 class seastate_result_data(BaseModel, extra="forbid"):
