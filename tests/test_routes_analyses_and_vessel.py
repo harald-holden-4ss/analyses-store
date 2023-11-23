@@ -122,13 +122,14 @@ def test_get_vessel(app, route, called_with):
 @pytest.mark.parametrize(
     "route, called_with, obj_to_post",
     [
-        ("/api/vessels", "vessels", {"name": "test_1", "imo": 12345}),
+        ("/api/vessels", "vessels", {"name": "test_1", "imo": 12345, 'year_built': None}),
         (
             "/api/analyses",
             "analyses",
             {
                 "metadata": {
                     "responsible_engineer": "Jonny Yess",
+                    'analysis_input_id': None,
                     "project_id": 1234,
                     "well": {
                         "name": "well1",

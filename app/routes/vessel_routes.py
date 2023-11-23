@@ -3,7 +3,7 @@ from ..services.database_service import database_service
 from fastapi import Response
 from azure.cosmos.exceptions import CosmosResourceNotFoundError, CosmosHttpResponseError
 import json
-from app.models.analyses import vessel
+from app.models.vessel import vessel
 
 
 def get_vessel_router(db_serv: database_service):
