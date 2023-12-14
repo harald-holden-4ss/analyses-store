@@ -133,6 +133,7 @@ def test_get_vessel(app, route, called_with):
                     "project_id": 1234,
                     "well": {
                         "name": "well1",
+                        "well_id_4insight": None,
                         "well_boundary_type": "well_included",
                         "design_type": "satelite",
                         "location": {"longitude": 7.5, "latitude": 62.5},
