@@ -106,7 +106,7 @@ class soil_data(BaseModel, extra="forbid"):
 
 class well_info(BaseModel, extra="forbid"):
     name: str = Field(None, min_length=1)
-    well_id_4insight: str = Field(None)
+    well_id_4insight: str | None = None
     well_boundary_type: Literal["fixed", "well_included", "rotational_spring"]
     design_type: Literal["can", "satelite", "template"] | None = None
     location: lon_lat_location | None = None
