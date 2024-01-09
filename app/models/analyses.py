@@ -99,7 +99,7 @@ class lon_lat_location(BaseModel, extra="forbid"):
 
 
 class soil_data(BaseModel, extra="forbid"):
-    soil_type: Literal["api", "jeanjean", "'zakeri"] | None = None
+    soil_type: Literal["api", "jeanjean", "zakeri"] | None = None
     soil_version: Literal["high", "low", "best"] | None = None
     soil_sensitivity: Literal["clay", "sand"] | None = None
 
